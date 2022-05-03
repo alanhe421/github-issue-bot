@@ -28,15 +28,21 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.VPS_DEPLOY_KEY }}
-      - name: Deploy VPS
-        run: |
-          ssh-keyscan ${{ secrets.VPS_DEPLOY_USER }} >> ~/.ssh/known_hosts
-          rsync -az -vv --delete -e 'ssh -p ${{ secrets.VPS_DEPLOY_PORT }}' ./ ${{ secrets.VPS_DEPLOY_USER }}@${{ secrets.VPS_DEPLOY_ADDRESS }}:/var/github-issue-bot
+      - name: Deploy to VPS
+        uses: burnett01/rsync-deployments@5.2
+        with:
+          switches: -avzr --delete
+          path: .
+          remote_path: /var/github-issue-bot
+          remote_host: ${{ secrets.VPS_DEPLOY_ADDRESS }}
+          remote_port: ${{ secrets.VPS_DEPLOY_PORT }}
+          remote_user: ${{ secrets.VPS_DEPLOY_USER }}
+          remote_key: ${{ secrets.VPS_DEPLOY_KEY }}
       - name: Update Blog Source Posts on VPS
         uses: appleboy/ssh-action@master
         with:
-          host: 1991421.cn
-          username: root
+          host: ${{ secrets.VPS_DEPLOY_ADDRESS }}
+          username: ${{ secrets.VPS_DEPLOY_USER }}
           key: ${{ secrets.VPS_DEPLOY_KEY }}
           port: ${{ secrets.VPS_DEPLOY_PORT }}
           script: |
