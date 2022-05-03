@@ -30,6 +30,7 @@ jobs:
           ssh-private-key: ${{ secrets.VPS_DEPLOY_KEY }}
       - name: Deploy VPS
         run: |
+          ssh-keyscan ${{ secrets.VPS_DEPLOY_USER }} >> ~/.ssh/known_hosts
           rsync -az -vv --delete -e 'ssh -p ${{ secrets.VPS_DEPLOY_PORT }}' ./ ${{ secrets.VPS_DEPLOY_USER }}@${{ secrets.VPS_DEPLOY_ADDRESS }}:/var/github-issue-bot
       - name: Update Blog Source Posts on VPS
         uses: appleboy/ssh-action@master
