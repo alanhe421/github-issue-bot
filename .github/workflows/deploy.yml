@@ -45,7 +45,7 @@ jobs:
           key: ${{ secrets.VPS_DEPLOY_KEY }}
           port: ${{ secrets.VPS_DEPLOY_PORT }}
           script: |
-            cd /var/github-issue-bot
+            cd /home/opc/github-issue-bot
             npm i
       - name: Notify
         uses: appleboy/telegram-action@master
