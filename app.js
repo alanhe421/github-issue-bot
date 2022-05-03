@@ -17,8 +17,14 @@ class User {
 
   constructor(id) {
     this._id = id;
-    let configJson = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
-    this._repos = JSON.parse(configJson)[this._id] || [];
+    try {
+      let configJson = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
+      this._repos = JSON.parse(configJson)[this._id] || [];
+    } catch (e) {
+      console.error(e);
+      this._repos = [];
+      fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify({}), 'utf8', () => null);
+    }
   }
 
   addRepo(repo) {
