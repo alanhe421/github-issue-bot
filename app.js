@@ -25,7 +25,14 @@ class User {
     this._repos.push(repo);
     let configStr = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
     const configJson = JSON.parse(configStr);
-    configJson[this.id] = this._repos;
+    configJson[this._id] = this._repos;
+    fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify(configJson), 'utf8', () => null);
+  }
+
+  clearRepo() {
+    let configStr = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
+    const configJson = JSON.parse(configStr);
+    delete configJson[this._id];
     fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify(configJson), 'utf8', () => null);
   }
 
@@ -92,11 +99,18 @@ bot.onText(/\/repo-list$/, async (msg, match) => {
   bot.sendMessage(chatId, `The following repos is ${user.reposStr}`);
 });
 
+bot.onText(/\/repo-clear$/, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const user = new User(String(msg.from.id));
+  user.clearRepo();
+  bot.sendMessage(chatId, `Your repo cleared!`);
+});
+
 bot.on('message', async (msg) => {
   const user = new User(String(msg.from.id));
   const chatId = msg.chat.id;
   if (user.inValid) {
-    return bot.sendMessage(chatId, 'You should add repo firstly!.');
+    return bot.sendMessage(chatId, 'You should add repo firstly! just type /repo-add');
   }
   if (msg.text.trim().length < 2) {
     return bot.sendMessage(chatId, 'Keywords must have at least 2 characters!');
