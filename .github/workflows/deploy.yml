@@ -32,7 +32,7 @@ jobs:
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avzr --delete
-          remote_path: /var/github-issue-bot
+          remote_path: /home/opc/github-issue-bot
           remote_host: ${{ secrets.VPS_DEPLOY_ADDRESS }}
           remote_port: ${{ secrets.VPS_DEPLOY_PORT }}
           remote_user: ${{ secrets.VPS_DEPLOY_USER }}
