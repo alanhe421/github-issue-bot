@@ -81,10 +81,15 @@ bot.on('message', async (msg) => {
   if (msg.text.trim().length < 2) {
     return bot.sendMessage(chatId, 'Keywords must have at least 2 characters!');
   }
+
+  const sended = await bot.sendMessage(chatId, 'searching⏳...,');
+
   const issues = await user.searchIssues(msg.text);
   if (issues.length) {
-    bot.sendMessage(chatId, issues.map(item => item.title + item.html_url).join('\n'));
+    bot.editMessageText(issues.map(item => item.title + item.html_url).join('\n'), {
+      message_id: sended.message_id, chat_id: chatId
+    });
   } else {
-    bot.sendMessage(chatId, 'No results matched your search.');
+    bot.editMessageText('No results matched your search.', {message_id: sended.message_id, chat_id: chatId});
   }
 });
