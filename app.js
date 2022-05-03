@@ -113,6 +113,9 @@ bot.onText(/\/repo-clear$/, async (msg, match) => {
 });
 
 bot.on('message', async (msg) => {
+  if (msg.text.match(/\/help$/) || msg.text.match(/\/about$/) || msg.text.match(/\/repo-add$/) || msg.text.match(/\/repo-list$/) || msg.text.match(/\/repo-clear$/)) {
+    return;
+  }
   const user = new User(String(msg.from.id));
   const chatId = msg.chat.id;
   if (user.inValid) {
