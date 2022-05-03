@@ -24,9 +24,13 @@ jobs:
           access_token: ${{ github.token }}
       - name: Git checkout
         uses: actions/checkout@v2
+      - name: SSH agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.VPS_DEPLOY_KEY }}
       - name: Deploy VPS
         run: |
-          rsync -az -vv --delete -e 'ssh -p ${{ secrets.VPS_DEPLOY_KEY }}' ./ ${{ secrets.VPS_DEPLOY_USER }}@${{ secrets.VPS_DEPLOY_ADDRESS }}:/var/github-issue-bot
+          rsync -az -vv --delete -e 'ssh -p ${{ secrets.VPS_DEPLOY_PORT }}' ./ ${{ secrets.VPS_DEPLOY_USER }}@${{ secrets.VPS_DEPLOY_ADDRESS }}:/var/github-issue-bot
       - name: Update Blog Source Posts on VPS
         uses: appleboy/ssh-action@master
         with:
