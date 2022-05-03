@@ -1,19 +1,32 @@
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_TOKEN;
 const axios = require('axios');
+const fs = require('fs');
+const path = require("path");
 const axiosInstance = axios.create();
 
 /**
  * 用户
  */
 class User {
+  /**
+   *  用户唯一ID
+   */
+  _id = null;
   _repos = [];
 
-  constructor() {
+  constructor(id) {
+    this._id = id;
+    let configJson = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
+    this._repos = JSON.parse(configJson)[this._id] || [];
   }
 
   addRepo(repo) {
-    this._repos.push(repo)
+    this._repos.push(repo);
+    let configStr = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
+    const configJson = JSON.parse(configStr);
+    configJson[this.id] = this._repos;
+    fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify(configJson), 'utf8', () => null);
   }
 
   async searchIssues(keyword) {
@@ -30,11 +43,9 @@ class User {
   }
 
   get inValid() {
-    return this._repos.length === 0;
+    return this._id === null || this._repos.length === 0;
   }
 }
-
-const user = new User();
 
 
 const bot = new TelegramBot(token, {
@@ -58,6 +69,8 @@ bot.onText(/\/about$/, (msg, match) => {
  */
 bot.onText(/\/repo-add$/, async (msg, match) => {
   const chatId = msg.chat.id;
+  const user = new User(String(msg.from.id));
+
   const sended = await bot.sendMessage(chatId, 'add github repo, send repo path like yagop/node-telegram-bot-api', {
     reply_markup: {
       force_reply: true,
@@ -75,10 +88,12 @@ bot.onText(/\/repo-add$/, async (msg, match) => {
 
 bot.onText(/\/repo-list$/, async (msg, match) => {
   const chatId = msg.chat.id;
+  const user = new User(String(msg.from.id));
   bot.sendMessage(chatId, `The following repos is ${user.reposStr}`);
 });
 
 bot.on('message', async (msg) => {
+  const user = new User(String(msg.from.id));
   const chatId = msg.chat.id;
   if (user.inValid) {
     return bot.sendMessage(chatId, 'You should add repo firstly!.');
@@ -107,3 +122,5 @@ function repoPathIsValid(repoPath) {
   }
   return false;
 }
+
+
