@@ -129,8 +129,8 @@ bot.on('message', async (msg) => {
 
   const issues = await user.searchIssues(msg.text);
   if (issues.length) {
-    bot.editMessageText(issues.map((item, index) => `${index + 1}.${item.title}：${item.html_url}`).join('\n\n'), {
-      message_id: sended.message_id, chat_id: chatId
+    bot.editMessageText(issues.map((item, index) => `${index+1}. ${item.title}：${item.html_url}`).join('\n'), {
+      message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
     });
   } else {
     bot.editMessageText('No results matched your search.', {message_id: sended.message_id, chat_id: chatId});
