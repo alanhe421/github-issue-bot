@@ -31,7 +31,7 @@ jobs:
       - name: Deploy VPS
         run: |
           ssh-keyscan -H ${{ secrets.VPS_DEPLOY_ADDRESS }} >> ~/.ssh/known_hosts
-          rsync -avz -e 'ssh -p ${{ secrets.VPS_DEPLOY_PORT }}' deploy/** ${{ secrets.VPS_DEPLOY_USER }}@${{ secrets.VPS_DEPLOY_ADDRESS }}:/home/opc/github-issue-bot
+          rsync -avz -e 'ssh -p ${{ secrets.VPS_DEPLOY_PORT }}' . ${{ secrets.VPS_DEPLOY_USER }}@${{ secrets.VPS_DEPLOY_ADDRESS }}:/home/opc/github-issue-bot
       - name: Update Blog Source Posts on VPS
         uses: appleboy/ssh-action@master
         with:
