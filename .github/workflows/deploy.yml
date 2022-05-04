@@ -24,10 +24,12 @@ jobs:
           access_token: ${{ github.token }}
       - name: Git checkout
         uses: actions/checkout@v2
-      - name: SSH agent
-        uses: webfactory/ssh-agent@v0.5.4
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
         with:
-          ssh-private-key: ${{ secrets.VPS_DEPLOY_KEY }}
+          key: ${{ secrets.VPS_DEPLOY_KEY }}
+          known_hosts: ${{ secrets.VPS_DEPLOY_ADDRESS }}
+          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - name: Deploy VPS
         run: |
           ssh-keyscan -H ${{ secrets.VPS_DEPLOY_ADDRESS }} >> ~/.ssh/known_hosts
