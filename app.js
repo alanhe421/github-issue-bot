@@ -68,13 +68,15 @@ const bot = new TelegramBot(token, {
 
 bot.onText(/\/(help|start)$/, (msg, match) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'you can search your repos by keyword. \nFirstly, /repo-add');
+  bot.sendMessage(chatId, 'You can search your repos by keyword. \nFirstly, /repo-add');
 });
 
 
 bot.onText(/\/about$/, (msg, match) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'Developed By Alan He, My site is https://1991421.cn');
+  bot.sendMessage(chatId, 'Developed By Alan He, My site is https://1991421.cn', {
+    parse_mode: 'Markdown'
+  });
 });
 
 /**
@@ -84,9 +86,10 @@ bot.onText(/\/repoadd$/, async (msg, match) => {
   const chatId = msg.chat.id;
   const user = new User(String(msg.from.id));
 
-  const sended = await bot.sendMessage(chatId, 'add github repo, send repo path like yagop/node-telegram-bot-api', {
+  const sended = await bot.sendMessage(chatId, 'Add github repo, send repo path like `yagop/node-telegram-bot-api`', {
     reply_markup: {
       force_reply: true,
+      parse_mode: 'Markdown'
     }
   });
   bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
@@ -129,7 +132,7 @@ bot.on('message', async (msg) => {
 
   const issues = await user.searchIssues(msg.text);
   if (issues.length) {
-    bot.editMessageText(issues.map((item, index) => `${index+1}. ${item.title}：${item.html_url}`).join('\n'), {
+    bot.editMessageText(issues.map((item, index) => `${index + 1}. ${item.title}：${item.html_url}`).join('\n'), {
       message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
     });
   } else {
