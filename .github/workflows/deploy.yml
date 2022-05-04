@@ -25,7 +25,7 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v2
       - name: SSH agent
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.VPS_DEPLOY_KEY }}
       - name: Deploy VPS
