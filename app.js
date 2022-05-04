@@ -66,7 +66,7 @@ const bot = new TelegramBot(token, {
 });
 
 
-bot.onText(/\/help$/, (msg, match) => {
+bot.onText(/\/(help|start)$/, (msg, match) => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, 'you can search your repos by keyword. \nFirstly, /repo-add');
 });
@@ -113,7 +113,7 @@ bot.onText(/\/repoclear$/, async (msg, match) => {
 });
 
 bot.on('message', async (msg) => {
-  if (msg.text.match(/\/help$/) || msg.text.match(/\/about$/) || msg.text.match(/\/repoadd$/) || msg.text.match(/\/repolist$/) || msg.text.match(/\/repoclear$/)) {
+  if (msg.text.match(/\/(help|start)$/) || msg.text.match(/\/about$/) || msg.text.match(/\/repoadd$/) || msg.text.match(/\/repolist$/) || msg.text.match(/\/repoclear$/)) {
     return;
   }
   const user = new User(String(msg.from.id));
