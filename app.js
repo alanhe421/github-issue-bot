@@ -80,7 +80,7 @@ bot.onText(/\/about$/, (msg, match) => {
 /**
  * 添加GitHub仓库
  */
-bot.onText(/\/repo-add$/, async (msg, match) => {
+bot.onText(/\/repoadd$/, async (msg, match) => {
   const chatId = msg.chat.id;
   const user = new User(String(msg.from.id));
 
@@ -99,13 +99,13 @@ bot.onText(/\/repo-add$/, async (msg, match) => {
   })
 });
 
-bot.onText(/\/repo-list$/, async (msg, match) => {
+bot.onText(/\/repolist$/, async (msg, match) => {
   const chatId = msg.chat.id;
   const user = new User(String(msg.from.id));
   bot.sendMessage(chatId, `The following repos is ${user.reposStr}`);
 });
 
-bot.onText(/\/repo-clear$/, async (msg, match) => {
+bot.onText(/\/repoclear$/, async (msg, match) => {
   const chatId = msg.chat.id;
   const user = new User(String(msg.from.id));
   user.clearRepo();
@@ -113,7 +113,7 @@ bot.onText(/\/repo-clear$/, async (msg, match) => {
 });
 
 bot.on('message', async (msg) => {
-  if (msg.text.match(/\/help$/) || msg.text.match(/\/about$/) || msg.text.match(/\/repo-add$/) || msg.text.match(/\/repo-list$/) || msg.text.match(/\/repo-clear$/)) {
+  if (msg.text.match(/\/help$/) || msg.text.match(/\/about$/) || msg.text.match(/\/repoadd$/) || msg.text.match(/\/repolist$/) || msg.text.match(/\/repoclear$/)) {
     return;
   }
   const user = new User(String(msg.from.id));
