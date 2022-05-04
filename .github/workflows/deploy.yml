@@ -32,6 +32,7 @@ jobs:
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - name: Deploy VPS
         run: |
+          ssh-keyscan -H ${{ secrets.VPS_DEPLOY_ADDRESS }} >> ~/.ssh/known_hosts
           rsync . ${{ secrets.VPS_DEPLOY_USER }}@${{ secrets.VPS_DEPLOY_ADDRESS }}:/home/opc/github-issue-bot
       - name: Update Blog Source Posts on VPS
         uses: appleboy/ssh-action@master
