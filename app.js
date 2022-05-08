@@ -123,7 +123,7 @@ bot.on('message', async (msg) => {
   const user = new User(String(msg.from.id));
   const chatId = msg.chat.id;
   if (user.inValid) {
-    return bot.sendMessage(chatId, 'You should add repo firstly! just type /repo-add');
+    return bot.sendMessage(chatId, 'You should add repo firstly! just type /repoadd');
   }
   if (msg.text.trim().length < 2) {
     return bot.sendMessage(chatId, 'Keywords must have at least 2 characters!');
