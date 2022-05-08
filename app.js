@@ -4,6 +4,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require("path");
 const axiosInstance = axios.create();
+const qs = require('querystring');
 
 /**
  * 用户
@@ -44,7 +45,7 @@ class User {
 
   async searchIssues(keyword) {
     const resArr = await Promise.all(this._repos.map(repo => {
-      return axiosInstance.get(`https://api.github.com/search/issues?q=repo:${repo}%20type:issue%20${keyword}`).then(res => res.data)
+      return axiosInstance.get(`https://api.github.com/search/issues?q=repo:${repo}%20type:issue%20${qs.escape(keyword)}`).then(res => res.data)
     }));
     return resArr.reduce((totalItems, res) => {
       return totalItems.concat(res.items);
