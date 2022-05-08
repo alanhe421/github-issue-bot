@@ -1,5 +1,7 @@
 > Search multi-repo issues by keyword.
 
+[Get bot 🤖️](https://t.me/github_issue_1_bot)
+
 ## Get started
 
 1. `/repo-add` add repo
