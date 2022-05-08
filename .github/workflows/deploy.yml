@@ -34,7 +34,7 @@ jobs:
         run: |
           ssh-keyscan -H ${{ secrets.VPS_DEPLOY_ADDRESS }} >> ~/.ssh/known_hosts
           rsync -a . ${{ secrets.VPS_DEPLOY_USER }}@${{ secrets.VPS_DEPLOY_ADDRESS }}:/home/opc/github-issue-bot
-      - name: Update Blog Source Posts on VPS
+      - name: Update Bot Program on VPS
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_DEPLOY_ADDRESS }}
