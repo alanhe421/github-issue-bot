@@ -89,24 +89,28 @@ bot.onText(/\/repoadd$/, async (msg, match) => {
 
   const sended = await bot.sendMessage(chatId, 'Add github repo, send repo path like `yagop/node-telegram-bot-api`', {
     reply_markup: {
-      force_reply: true,
-      parse_mode: 'Markdown'
+      force_reply: true, parse_mode: 'Markdown'
     }
   });
-  bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
+  const replyToMessageListener = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
     if (repoPathIsValid(msg.text)) {
       user.addRepo(msg.text.trim());
       bot.sendMessage(sended.chat.id, `repo added\nThe following repos is ${user.reposStr}`);
     } else {
       bot.sendMessage(sended.chat.id, `repo name invalid, send repo path like yagop/node-telegram-bot-api`);
     }
-  })
+    bot.removeReplyListener(replyToMessageListener);
+  });
 });
 
 bot.onText(/\/repolist$/, async (msg, match) => {
   const chatId = msg.chat.id;
   const user = new User(String(msg.from.id));
-  bot.sendMessage(chatId, `The following repos is ${user.reposStr}`);
+  if (user.reposStr) {
+    bot.sendMessage(chatId, `The following repos is ${user.reposStr}`);
+  } else {
+    bot.sendMessage(chatId, `No repo added`);
+  }
 });
 
 bot.onText(/\/repoclear$/, async (msg, match) => {
@@ -145,7 +149,9 @@ bot.on('message', async (msg) => {
       })
     }
   } else {
-    bot.editMessageText(`No issues matched your keyword \`${msg.text}\`.`, {message_id: sended.message_id, chat_id: chatId});
+    bot.editMessageText(`No issues matched your keyword \`${msg.text}\`.`, {
+      message_id: sended.message_id, chat_id: chatId
+    });
   }
 });
 
