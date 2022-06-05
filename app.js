@@ -134,10 +134,9 @@ bot.on('message', async (msg) => {
   const issues = await user.searchIssues(msg.text);
   if (issues.length) {
     const issuesGroups = groupBy(issues);
-    bot.editMessageText(buildIssueContent(issuesGroups[0]),{
-        message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
-      }
-    );
+    bot.editMessageText(`Found ${issues.length} issues about keyword \`${msg.text}\`\n` + buildIssueContent(issuesGroups[0]), {
+      message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
+    });
     if (issuesGroups.length > 1) {
       issuesGroups.slice(1).forEach(issues => {
         bot.sendMessage(chatId, buildIssueContent(issues), {
@@ -146,7 +145,7 @@ bot.on('message', async (msg) => {
       })
     }
   } else {
-    bot.editMessageText('No results matched your search.', {message_id: sended.message_id, chat_id: chatId});
+    bot.editMessageText(`No issues matched your keyword \`${msg.text}\`.`, {message_id: sended.message_id, chat_id: chatId});
   }
 });
 
@@ -172,4 +171,5 @@ function groupBy(arr, chunkSize = 5) {
 
 
 function buildIssueContent(issues = []) {
-  return issues.map((item, index) => `${index + 1}. ${item.title}：${item.html_url}`).join('\n')}
+  return issues.map((item, index) => `${index + 1}. ${item.title}：${item.html_url}`).join('\n')
+}
