@@ -29,6 +29,9 @@ class User {
   }
 
   addRepo(repo) {
+    if (this._repos.includes(repo)) {
+      return;
+    }
     this._repos.push(repo);
     let configStr = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
     const configJson = JSON.parse(configStr);
