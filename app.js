@@ -140,7 +140,9 @@ bot.on('message', async (msg) => {
     );
     if (issuesGroups.length > 1) {
       issuesGroups.slice(1).forEach(issues => {
-        bot.sendMessage(chatId, buildIssueContent(issues));
+        bot.sendMessage(chatId, buildIssueContent(issues), {
+          disable_web_page_preview: true
+        });
       })
     }
   } else {
