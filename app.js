@@ -1,10 +1,10 @@
 const TelegramBot = require('node-telegram-bot-api');
-const token = process.env.TELEGRAM_TOKEN;
 const axios = require('axios');
 const fs = require('fs');
 const path = require("path");
 const axiosInstance = axios.create();
 const qs = require('querystring');
+const token = process.env.TELEGRAM_TOKEN;
 
 /**
  * 用户
@@ -133,9 +133,16 @@ bot.on('message', async (msg) => {
 
   const issues = await user.searchIssues(msg.text);
   if (issues.length) {
-    bot.editMessageText(issues.map((item, index) => `${index + 1}. ${item.title}：${item.html_url}`).join('\n'), {
-      message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
-    });
+    const issuesGroups = groupBy(issues);
+    bot.editMessageText(buildIssueContent(issuesGroups[0]),{
+        message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
+      }
+    );
+    if (issuesGroups.length > 1) {
+      issuesGroups.slice(1).forEach(issues => {
+        bot.sendMessage(chatId, buildIssueContent(issues));
+      })
+    }
   } else {
     bot.editMessageText('No results matched your search.', {message_id: sended.message_id, chat_id: chatId});
   }
@@ -150,4 +157,17 @@ function repoPathIsValid(repoPath) {
   return false;
 }
 
+function groupBy(arr, chunkSize = 5) {
+  return arr.reduce((res, item, index) => {
+    let groupNo = Math.floor(index / chunkSize);
+    if (!res[groupNo]) {
+      res[groupNo] = [];
+    }
+    res[groupNo].push(item);
+    return res;
+  }, []);
+}
 
+
+function buildIssueContent(issues = []) {
+  return issues.map((item, index) => `${index + 1}. ${item.title}：${item.html_url}`).join('\n')}
