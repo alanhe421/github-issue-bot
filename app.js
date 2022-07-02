@@ -92,7 +92,7 @@ bot.onText(/\/repoadd$/, async (msg, match) => {
 
   const sended = await bot.sendMessage(chatId, 'Add github repo, send repo path like `yagop/node-telegram-bot-api`', {
     reply_markup: {
-      force_reply: false, parse_mode: 'Markdown'
+      force_reply: true, parse_mode: 'Markdown'
     }
   });
   const replyToMessageListener = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
