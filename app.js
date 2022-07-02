@@ -95,8 +95,8 @@ bot.onText(/\/repoadd$/, async (msg, match) => {
       force_reply: true, parse_mode: 'Markdown'
     }
   });
-  const replyToMessageListener = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
-    bot.removeReplyListener(replyToMessageListener);
+  const replyToMessageListenerId = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
+    bot.removeReplyListener(replyToMessageListenerId);
     if (repoPathIsValid(msg.text)) {
       user.addRepo(msg.text.trim());
       bot.sendMessage(sended.chat.id, `repo added\nThe following repos is ${user.reposStr}`);
