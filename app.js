@@ -60,7 +60,7 @@ class User {
   }
 
   updateEntireConfig(configJson) {
-    fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify(configJson), 'utf8', () => null);
+    fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify(configJson, null, 4), 'utf8', () => null);
   }
 
   updateUserConfig() {
@@ -203,8 +203,11 @@ bot.onText(/\/repoclear$/, async (msg, match) => {
   bot.sendMessage(chatId, `Your repo cleared!`);
 });
 
+/**
+ * 除了回复的消息及指令信息外，视为关键词进行GitHub issue检索
+ */
 bot.on('message', async (msg) => {
-  if (msg.text.match(/\/(help|start)$/) || msg.text.match(/\/about$/) || msg.text.match(/\/repoadd$/) || msg.text.match(/\/repolist$/) || msg.text.match(/\/repoclear$/) || msg.text.match(/\/tokenadd$/) || msg.text.match(/\/tokenclear$/)) {
+  if (msg.text.startsWith('/') || msg.reply_to_message) {
     return;
   }
   const user = new User(String(msg.from.id));
@@ -217,22 +220,27 @@ bot.on('message', async (msg) => {
   }
 
   const sended = await bot.sendMessage(chatId, 'searching⏳...,');
-
-  const issues = await user.searchIssues(msg.text);
-  if (issues.length) {
-    const issuesGroups = groupBy(issues);
-    bot.editMessageText(`Found ${issues.length} issues about keyword \`${msg.text}\`\n` + buildIssueContent(issuesGroups[0]), {
-      message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
-    });
-    if (issuesGroups.length > 1) {
-      issuesGroups.slice(1).forEach(issues => {
-        bot.sendMessage(chatId, buildIssueContent(issues), {
-          disable_web_page_preview: true
-        });
-      })
+  try {
+    const issues = await user.searchIssues(msg.text);
+    if (issues.length) {
+      const issuesGroups = groupBy(issues);
+      bot.editMessageText(`Found ${issues.length} issues about keyword \`${msg.text}\`\n` + buildIssueContent(issuesGroups[0]), {
+        message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
+      });
+      if (issuesGroups.length > 1) {
+        issuesGroups.slice(1).forEach(issues => {
+          bot.sendMessage(chatId, buildIssueContent(issues), {
+            disable_web_page_preview: true
+          });
+        })
+      }
+    } else {
+      bot.editMessageText(`No issues matched your keyword \`${msg.text}\`.`, {
+        message_id: sended.message_id, chat_id: chatId
+      });
     }
-  } else {
-    bot.editMessageText(`No issues matched your keyword \`${msg.text}\`.`, {
+  } catch (e) {
+    bot.editMessageText(e.response.data.errors.map(item => item.message).join(), {
       message_id: sended.message_id, chat_id: chatId
     });
   }
