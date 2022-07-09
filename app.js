@@ -157,7 +157,7 @@ bot.onText(/\/tokenclear$/, async (msg, match) => {
   const chatId = msg.chat.id;
   if (user._token) {
     user.clearToken();
-    bot.sendMessage(chatId, `token clear!`);
+    bot.sendMessage(chatId, `token cleared!`);
   } else {
     bot.sendMessage(chatId, `you haven't added the token！`);
   }
