@@ -5,6 +5,7 @@
 ## Get started
 
 1. `/repo-add` add repo
+1. `/token-add` add github access token
 2. type keyword to search
 
 ## Command list
