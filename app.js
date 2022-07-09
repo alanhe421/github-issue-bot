@@ -14,18 +14,41 @@ class User {
    *  用户唯一ID
    */
   _id = null;
+  /**
+   * github access token
+   * @see https://github.com/settings/tokens/new
+   */
+  _token = null;
   _repos = [];
 
   constructor(id) {
     this._id = id;
+    let userConfig = this.getUserConfig();
+    this._repos = userConfig.repos || [];
+    this._token = userConfig.token;
+  }
+
+  addToken(token) {
+    this._token = token;
+    this.updateUserConfig();
+  }
+
+  getUserConfig() {
     try {
-      let configJson = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
-      this._repos = JSON.parse(configJson)[this._id] || [];
-    } catch (e) {
-      console.error(e);
-      this._repos = [];
-      fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify({}), 'utf8', () => null);
+      const configStr = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
+      let parse = JSON.parse(configStr);
+      if (!parse[this._id]) {
+        parse[this._id] = {};
+      }
+      return parse[this._id];
+    } catch {
+      return ({});
     }
+  }
+
+  clearToken() {
+    this._token = null;
+    this.updateUserConfig();
   }
 
   addRepo(repo) {
@@ -33,22 +56,45 @@ class User {
       return;
     }
     this._repos.push(repo);
-    let configStr = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
-    const configJson = JSON.parse(configStr);
-    configJson[this._id] = this._repos;
+    this.updateUserConfig();
+  }
+
+  updateEntireConfig(configJson) {
     fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify(configJson), 'utf8', () => null);
   }
 
+  updateUserConfig() {
+    const entireConfig = this.getEntireConfig();
+    if (!entireConfig[this._id]) {
+      entireConfig[this._id] = {};
+    }
+    entireConfig[this._id] = {
+      repos: this._repos, token: this._token,
+    }
+    this.updateEntireConfig(entireConfig);
+  }
+
+  getEntireConfig() {
+    const entireConfig = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
+    try {
+      return JSON.parse(entireConfig);
+    } catch {
+      return {}
+    }
+  }
+
   clearRepo() {
-    let configStr = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
-    const configJson = JSON.parse(configStr);
-    delete configJson[this._id];
-    fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify(configJson), 'utf8', () => null);
+    this._repos = [];
+    this.updateUserConfig();
   }
 
   async searchIssues(keyword) {
     const resArr = await Promise.all(this._repos.map(repo => {
-      return axiosInstance.get(`https://api.github.com/search/issues?q=repo:${repo}%20type:issue%20${qs.escape(keyword)}`).then(res => res.data)
+      return axiosInstance.get(`https://api.github.com/search/issues?q=repo:${repo}%20type:issue%20${qs.escape(keyword)}`, {
+        headers: this._token ? {
+          Authorization: `token ${this._token}`
+        } : undefined
+      }).then(res => res.data)
     }));
     return resArr.reduce((totalItems, res) => {
       return totalItems.concat(res.items);
@@ -81,6 +127,40 @@ bot.onText(/\/about$/, (msg, match) => {
   bot.sendMessage(chatId, 'Developed By Alan He, My site is https://1991421.cn', {
     parse_mode: 'Markdown'
   });
+});
+
+/**
+ * 添加GitHub AccessToken
+ */
+bot.onText(/\/tokenadd$/, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const user = new User(String(msg.from.id));
+
+  const sended = await bot.sendMessage(chatId, 'Add github token, if you need to search a private repository', {
+    reply_markup: {
+      force_reply: true, parse_mode: 'Markdown'
+    }
+  });
+  const replyToMessageListenerId = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
+    if (msg.text.trim()) {
+      bot.removeReplyListener(replyToMessageListenerId);
+      user.addToken(msg.text.trim());
+      bot.sendMessage(sended.chat.id, `token added!`);
+    } else {
+      bot.sendMessage(sended.chat.id, `token is invalid!`);
+    }
+  });
+});
+
+bot.onText(/\/tokenclear$/, async (msg, match) => {
+  const user = new User(String(msg.from.id));
+  const chatId = msg.chat.id;
+  if (user._token) {
+    user.clearToken();
+    bot.sendMessage(chatId, `token clear!`);
+  } else {
+    bot.sendMessage(chatId, `you haven't added the token！`);
+  }
 });
 
 /**
@@ -124,7 +204,7 @@ bot.onText(/\/repoclear$/, async (msg, match) => {
 });
 
 bot.on('message', async (msg) => {
-  if (msg.text.match(/\/(help|start)$/) || msg.text.match(/\/about$/) || msg.text.match(/\/repoadd$/) || msg.text.match(/\/repolist$/) || msg.text.match(/\/repoclear$/)) {
+  if (msg.text.match(/\/(help|start)$/) || msg.text.match(/\/about$/) || msg.text.match(/\/repoadd$/) || msg.text.match(/\/repolist$/) || msg.text.match(/\/repoclear$/) || msg.text.match(/\/tokenadd$/) || msg.text.match(/\/tokenclear$/)) {
     return;
   }
   const user = new User(String(msg.from.id));
