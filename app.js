@@ -236,7 +236,7 @@ bot.on('message', async (msg) => {
       }
     } else {
       bot.editMessageText(`No issues matched your keyword \`${msg.text}\`.`, {
-        message_id: sended.message_id, chat_id: chatId
+        message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
       });
     }
   } catch (e) {
