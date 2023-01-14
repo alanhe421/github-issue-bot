@@ -144,6 +144,7 @@ bot.onText(/\/tokenadd$/, async (msg, match) => {
   const replyToMessageListenerId = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
     if (msg.text.trim()) {
       bot.removeReplyListener(replyToMessageListenerId);
+      bot.deleteMessage(chatId, msg.reply_to_message.message_id);
       user.addToken(msg.text.trim());
       bot.sendMessage(sended.chat.id, `token added!`);
     } else {
@@ -177,6 +178,7 @@ bot.onText(/\/repoadd$/, async (msg, match) => {
   });
   const replyToMessageListenerId = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
     bot.removeReplyListener(replyToMessageListenerId);
+    bot.deleteMessage(chatId, msg.reply_to_message.message_id);
     if (repoPathIsValid(msg.text)) {
       user.addRepo(msg.text.trim());
       bot.sendMessage(sended.chat.id, `repo added\nThe following repos is ${user.reposStr}`);
