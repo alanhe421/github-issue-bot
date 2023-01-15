@@ -143,7 +143,7 @@ bot.onText(/\/tokenadd$/, async (msg, match) => {
     ? 'Token Added, new token will replaced the old one.'
     : 'Add github token, if you need to search a private repository', {
     reply_markup: {
-      force_reply: !tokenAdded, parse_mode: 'Markdown'
+      force_reply: false, parse_mode: 'Markdown'
     }
   });
   const replyToMessageListenerId = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
@@ -163,9 +163,9 @@ bot.onText(/\/tokenclear$/, async (msg, match) => {
   const chatId = msg.chat.id;
   if (user.token) {
     user.clearToken();
-    bot.sendMessage(chatId, `token cleared!`);
+    bot.sendMessage(chatId, `Token cleared!`);
   } else {
-    bot.sendMessage(chatId, `you haven't added the token！`);
+    bot.sendMessage(chatId, `You haven't added the token！`);
   }
 });
 
