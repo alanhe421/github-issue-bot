@@ -92,16 +92,20 @@ class User {
    * 获取用户的所有仓库的命中issue
    */
   async searchIssues(keyword) {
-    const resArr = await Promise.all(this.repos.map(repo => {
-      return axiosInstance.get(`https://api.github.com/search/issues?q=repo:${repo}%20type:issue%20${qs.escape(keyword)}`, {
-        headers: this.token ? {
-          Authorization: `token ${this.token}`
-        } : undefined
-      }).then(res => res.data)
-    }));
-    return resArr.reduce((totalItems, res) => {
-      return totalItems.concat(res.items);
-    }, []);
+    try {
+      const resArr = await Promise.all(this.repos.map(repo => {
+        return axiosInstance.get(`https://api.github.com/search/issues?q=repo:${repo}%20type:issue%20${qs.escape(keyword)}`, {
+          headers: this.token ? {
+            Authorization: `token ${this.token}`
+          } : undefined
+        }).then(res => res.data)
+      }));
+      return resArr.reduce((totalItems, res) => {
+        return totalItems.concat(res.items);
+      }, []);
+    } catch (e) {
+      throw e;
+    }
   }
 
   get reposStr() {
@@ -247,7 +251,7 @@ bot.on('message', async (msg) => {
       });
     }
   } catch (e) {
-    bot.editMessageText(e.response.data.errors.map(item => item.message).join(), {
+    bot.editMessageText(e.message, {
       message_id: sended.message_id, chat_id: chatId
     });
   }
