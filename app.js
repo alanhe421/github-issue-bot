@@ -13,23 +13,23 @@ class User {
   /**
    *  用户唯一ID
    */
-  _id = null;
+  id = null;
   /**
-   * github access token
+   * GitHub access token
    * @see https://github.com/settings/tokens/new
    */
-  _token = null;
-  _repos = [];
+  token = null;
+  repos = [];
 
   constructor(id) {
-    this._id = id;
+    this.id = id;
     let userConfig = this.getUserConfig();
-    this._repos = userConfig.repos || [];
-    this._token = userConfig.token;
+    this.repos = userConfig.repos || [];
+    this.token = userConfig.token;
   }
 
   addToken(token) {
-    this._token = token;
+    this.token = token;
     this.updateUserConfig();
   }
 
@@ -37,25 +37,25 @@ class User {
     try {
       const configStr = fs.readFileSync(path.join(__dirname, '_config.json'), {encoding: 'utf8'});
       let parse = JSON.parse(configStr);
-      if (!parse[this._id]) {
-        parse[this._id] = {};
+      if (!parse[this.id]) {
+        parse[this.id] = {};
       }
-      return parse[this._id];
+      return parse[this.id];
     } catch {
       return ({});
     }
   }
 
   clearToken() {
-    this._token = null;
+    this.token = null;
     this.updateUserConfig();
   }
 
   addRepo(repo) {
-    if (this._repos.includes(repo)) {
+    if (this.repos.includes(repo)) {
       return;
     }
-    this._repos.push(repo);
+    this.repos.push(repo);
     this.updateUserConfig();
   }
 
@@ -65,11 +65,11 @@ class User {
 
   updateUserConfig() {
     const entireConfig = this.getEntireConfig();
-    if (!entireConfig[this._id]) {
-      entireConfig[this._id] = {};
+    if (!entireConfig[this.id]) {
+      entireConfig[this.id] = {};
     }
-    entireConfig[this._id] = {
-      repos: this._repos, token: this._token,
+    entireConfig[this.id] = {
+      repos: this.repos, token: this.token,
     }
     this.updateEntireConfig(entireConfig);
   }
@@ -84,15 +84,18 @@ class User {
   }
 
   clearRepo() {
-    this._repos = [];
+    this.repos = [];
     this.updateUserConfig();
   }
 
+  /**
+   * 获取用户的所有仓库的命中issue
+   */
   async searchIssues(keyword) {
-    const resArr = await Promise.all(this._repos.map(repo => {
+    const resArr = await Promise.all(this.repos.map(repo => {
       return axiosInstance.get(`https://api.github.com/search/issues?q=repo:${repo}%20type:issue%20${qs.escape(keyword)}`, {
-        headers: this._token ? {
-          Authorization: `token ${this._token}`
+        headers: this.token ? {
+          Authorization: `token ${this.token}`
         } : undefined
       }).then(res => res.data)
     }));
@@ -102,11 +105,11 @@ class User {
   }
 
   get reposStr() {
-    return this._repos.join(',');
+    return this.repos.join(',');
   }
 
   get inValid() {
-    return this._id === null || this._repos.length === 0;
+    return this.id === null || this.repos.length === 0;
   }
 }
 
@@ -135,10 +138,12 @@ bot.onText(/\/about$/, (msg, match) => {
 bot.onText(/\/tokenadd$/, async (msg, match) => {
   const chatId = msg.chat.id;
   const user = new User(String(msg.from.id));
-
-  const sended = await bot.sendMessage(chatId, 'Add github token, if you need to search a private repository', {
+  const tokenAdded = Boolean(user.token);
+  const sended = await bot.sendMessage(chatId, tokenAdded
+    ? 'Token Added, new token will replaced the old one.'
+    : 'Add github token, if you need to search a private repository', {
     reply_markup: {
-      force_reply: true, parse_mode: 'Markdown'
+      force_reply: !tokenAdded, parse_mode: 'Markdown'
     }
   });
   const replyToMessageListenerId = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
@@ -156,7 +161,7 @@ bot.onText(/\/tokenadd$/, async (msg, match) => {
 bot.onText(/\/tokenclear$/, async (msg, match) => {
   const user = new User(String(msg.from.id));
   const chatId = msg.chat.id;
-  if (user._token) {
+  if (user.token) {
     user.clearToken();
     bot.sendMessage(chatId, `token cleared!`);
   } else {
@@ -221,7 +226,7 @@ bot.on('message', async (msg) => {
     return bot.sendMessage(chatId, 'Keywords must have at least 2 characters!');
   }
 
-  const sended = await bot.sendMessage(chatId, 'searching⏳...,');
+  const sended = await bot.sendMessage(chatId, 'Searching⏳...,');
   try {
     const issues = await user.searchIssues(msg.text);
     if (issues.length) {
