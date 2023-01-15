@@ -226,7 +226,7 @@ bot.on('message', async (msg) => {
     return bot.sendMessage(chatId, 'Keywords must have at least 2 characters!');
   }
 
-  const sended = await bot.sendMessage(chatId, 'Searching⏳...,');
+  const sended = await bot.sendMessage(chatId, 'Searching⏳...');
   try {
     const issues = await user.searchIssues(msg.text);
     if (issues.length) {
