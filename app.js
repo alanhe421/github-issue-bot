@@ -84,6 +84,17 @@ class User {
     this.updateUserConfig();
   }
 
+  delRepo(repo) {
+    if (this.repos.includes(repo)) {
+      const findIdx = this.repos.indexOf(repo)
+      if (findIdx < 0) {
+        return;
+      }
+      this.repos.splice(findIdx, 1);
+      this.updateUserConfig();
+    }
+  }
+
   updateEntireConfig(configJson) {
     fs.writeFile(path.join(__dirname, '_config.json'), JSON.stringify(configJson, null, 4), 'utf8', () => null);
   }
@@ -176,9 +187,7 @@ class BotManager {
     const chatId = msg.chat.id;
     const user = new User(String(msg.from.id));
     const tokenAdded = Boolean(user.token);
-    const sended = await bot.sendMessage(chatId, tokenAdded
-      ? 'Token Added, new token will replaced the old one.'
-      : 'Add github token, if you need to search a private repository', {
+    const sended = await bot.sendMessage(chatId, tokenAdded ? 'Token Added, new token will replaced the old one.' : 'Add github token, if you need to search a private repository', {
       reply_markup: {
         force_reply: false, parse_mode: 'Markdown'
       }
@@ -234,6 +243,32 @@ class BotManager {
 
   }
 
+
+  async doRepoDel(msg, match) {
+    const bot = this.bot;
+
+    const chatId = msg.chat.id;
+    const user = new User(String(msg.from.id));
+    const sended = await bot.sendMessage(chatId, 'Remove github repo, send repo path like `yagop/node-telegram-bot-api`', {
+      reply_markup: {
+        force_reply: true, parse_mode: 'Markdown'
+      }
+    });
+    const replyToMessageListenerId = bot.onReplyToMessage(sended.chat.id, sended.message_id, (msg) => {
+      bot.removeReplyListener(replyToMessageListenerId);
+      bot.deleteMessage(chatId, msg.reply_to_message.message_id);
+      if (repoPathIsValid(msg.text)) {
+        user.delRepo(msg.text.trim());
+        bot.sendMessage(sended.chat.id, `repo deleted\n${this.getAddedRepo()}`, {
+          disable_web_page_preview: true
+        });
+      } else {
+        bot.sendMessage(sended.chat.id, `repo name invalid, send repo path like yagop/node-telegram-bot-api`);
+      }
+    });
+
+  }
+
   doRepoList(msg) {
     const bot = this.bot;
 
@@ -241,8 +276,7 @@ class BotManager {
     const user = new User(String(msg.from.id));
     if (user.repos.length > 0) {
       bot.sendMessage(chatId, this.getAddedRepo(user), {
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true
+        parse_mode: 'Markdown', disable_web_page_preview: true
       });
     } else {
       bot.sendMessage(chatId, `No repo added`);
@@ -321,6 +355,9 @@ class BotManager {
       }
       if (msg.text.match(/\/repoadd$/)) {
         return this.doRepoAdd(msg);
+      }
+      if (msg.text.match(/\/repodel$/)) {
+        return this.doRepoDel(msg);
       }
       if (msg.text.match(/\/repolist$/)) {
         return this.doRepoList(msg);

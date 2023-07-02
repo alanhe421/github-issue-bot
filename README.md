@@ -16,6 +16,7 @@ about - about me
 repoadd - add repo
 repolist - list added repo
 repoclear - clear added repo
+repodel - del the repo
 tokenadd - add github access token
 tokenclear - clear github access token
 ```
