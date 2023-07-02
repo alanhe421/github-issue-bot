@@ -127,21 +127,19 @@ class User {
   /**
    * 获取用户的所有仓库的命中issue
    */
-  async searchIssues(keyword) {
-    try {
-      const resArr = await Promise.all(this.repos.map(repo => {
-        return axiosInstance.get(`https://api.github.com/search/issues?q=repo:${repo}%20type:issue%20${qs.escape(keyword)}`, {
-          headers: this.token ? {
-            Authorization: `token ${this.token}`
-          } : undefined
-        }).then(res => res.data)
-      }));
-      return resArr.reduce((totalItems, res) => {
-        return totalItems.concat(res.items);
-      }, []);
-    } catch (e) {
-      throw e;
-    }
+  searchIssues(keyword) {
+    return Promise.allSettled(this.repos.map(repo => {
+      return axiosInstance.get(`https://api.github.com/search/issues?q=repo:${repo}%20type:issue%20${qs.escape(keyword)}`, {
+        headers: this.token ? {
+          Authorization: `token ${this.token}`
+        } : undefined
+      }).then(res => res.data);
+    })).then(resArr => {
+      return resArr.filter(item => item.status === 'fulfilled').map(item => item.value)
+        .reduce((totalItems, res) => {
+          return totalItems.concat(res.items);
+        }, []);
+    })
   }
 
   get inValid() {
