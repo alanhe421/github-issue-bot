@@ -306,7 +306,7 @@ class BotManager {
       const issues = await user.searchIssues(msg.text);
       if (issues.length) {
         const issuesGroups = groupBy(issues);
-        bot.editMessageText(`Found ${issues.length} issues about keyword \`${msg.text}\`\n` + buildIssueContent(issuesGroups[0]), {
+        bot.editMessageText(`Found **${issues.length}** issues about keyword \`${msg.text}\`\n` + buildIssueContent(issuesGroups[0]), {
           message_id: sended.message_id, chat_id: chatId, parse_mode: 'Markdown'
         });
         if (issuesGroups.length > 1) {
