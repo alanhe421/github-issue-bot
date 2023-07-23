@@ -1,4 +1,9 @@
 const TelegramBot = require('node-telegram-bot-api');
+const nodeEnv = process.env.NODE_ENV || 'development';
+const {join} = require("path");
+require('dotenv').config({
+  path: join(__dirname, `.env.${nodeEnv}`),
+});
 const axios = require('axios');
 const fs = require('fs');
 const path = require("path");

@@ -1,3 +1,5 @@
 .idea
 node_modules
 _config.json
+.env.production
+.env.development
