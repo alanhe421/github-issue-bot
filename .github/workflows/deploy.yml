@@ -44,7 +44,7 @@ jobs:
           script: |
             cd /home/opc/github-issue-bot
             npm i
-            pm2 restart github-issue-bot
+            pm2 startOrReload ecosystem.config.js --env production
       - name: Notify
         uses: appleboy/telegram-action@master
         with:
